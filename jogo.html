@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz de Programação Web - Django</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    /* GERAL */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #f7f3fb; /* Cor de fundo suave */
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+
+    a {
+      color: #ffffff;
+      text-decoration: none;
+      transition: 0.5s;
+    }
+
+    a:hover {
+      color: #ec4899; /* Rosa mais forte no hover */
+    }
+
+    .container {
+      display: grid;
+      grid-template-areas: 'header' 'main' 'footer';
+      position: relative;
+      height: 100vh;
+    }
+
+    header, main, footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    header {
+      grid-area: header;
+      background-color: #ec4899; /* Rosa vibrante */
+      padding: 20px;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 30px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    main {
+      grid-area: main;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    footer {
+      grid-area: footer;
+      padding: 15px;
+      background-color: #ec4899; /* Cor de fundo rosa no rodapé */
+      width: 100%;
+    }
+
+    footer p {
+      color: #fff;
+      font-size: 14px;
+    }
+
+    h2 {
+      color: #444;
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+    #quizz-container, #score-container {
+      background-color: #fff;
+      color: #333;
+      padding: 25px;
+      border-radius: 0px;
+      width: 100%;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    #quizz-container button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 10px;
+      border: 2px solid #ddd;
+      border-radius: 0px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background-color: #f8f4fc; /* Cor de fundo suave para os botões */
+    }
+
+    #quizz-container button.correct {
+      background-color: #d1fae5; /* Cor suave para resposta correta */
+      color: #16a34a; /* Texto verde */
+    }
+
+    #quizz-container button.incorrect {
+      background-color: #fcd2d2; /* Cor suave para resposta incorreta */
+      color: #b91c1c; /* Texto vermelho */
+    }
+
+    #quizz-container button:hover {
+      background-color: #f3e5f5; /* Efeito hover suave */
+    }
+
+    #restart {
+      background-color: #ec4899; /* Rosa vibrante no botão reiniciar */
+      color: #fff;
+      font-weight: bold;
+      padding: 15px;
+      border: none;
+      width: 200px;
+      border-radius: 0px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 20px;
+    }
+
+    #restart:hover {
+      background-color: #db2777; /* Tom mais escuro de rosa no hover */
+    }
+
+    #next-page-button {
+      display: none;
+      background-color: #4caf50; /* Botão de próxima página com verde suave */
+      color: #fff;
+      font-weight: bold;
+      padding: 15px;
+      border: none;
+      width: 200px;
+      border-radius: 0px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 20px;
+    }
+
+    #next-page-button:hover {
+      background-color: #388e3c;
+    }
+
+    #score-container {
+      display: none;
+    }
+
+    /* Animações de transição */
+    .fade-in {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Quiz de Programação Web - Django</h1>
+    </header>
+    <main>
+      <h2>Responda as perguntas e acerte no mínimo 70% para avançar para a próxima página!</h2>
+      <div id="quizz-container" class="fade-in">
+        <div id="question"></div>
+        <div id="answers-box"></div>
+      </div>
+      <div id="score-container">
+        <p id="display-score"></p>
+        <button id="restart" onclick="restartQuiz()">Tentar Novamente</button>
+        <button id="next-page-button" onclick="goToNextPage()">Ir para a Próxima Página</button>
+      </div>
+    </main>
+    <footer>
+      <p>&copy; Quiz de Programação Web - <a href="https://www.instagram.com/kerolykarolayne/profilecard/?igsh=cTg0dTZ1dHExangy" target="_blank" style="color: white; text-decoration: none;">Keroly</a> <span>❤️</span></p></p>
+    </footer>
+  </div>
+
+  <script>
+    // Perguntas do Quiz
+    const questions = [
+      {
+        question: "Qual comando no Django é usado para criar um novo banco de dados?",
+        answers: ["python manage.py migrate", "python manage.py syncdb", "python manage.py makemigrations", "python manage.py migrate_db"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Qual a função do comando 'python manage.py makemigrations'?",
+        answers: ["Cria as tabelas no banco de dados", "Cria arquivos de migração para banco de dados", "Atualiza o banco de dados", "Apaga migrações antigas"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "O que é o ORM do Django?",
+        answers: ["Object-Relational Mapper", "Object-Reference Mapper", "Offline Relational Mapping", "Online Resource Manager"],
+        correctAnswerIndex: 0
+      },
+      {
+        question: "Qual é o principal arquivo de configuração de um projeto Django?",
+        answers: ["settings.py", "urls.py", "models.py", "views.py"],
+        correctAnswerIndex: 0
+      },
+      {
+        question: "Como você define uma URL personalizada em Django?",
+        answers: ["Através do arquivo models.py", "Através do arquivo settings.py", "Através do arquivo urls.py", "Através do arquivo views.py"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "O que faz a função 'render()' no Django?",
+        answers: ["Renderiza um template com contexto", "Renderiza uma página estática", "Renderiza um formulário", "Renderiza um banco de dados"],
+        correctAnswerIndex: 0
+      },
+      {
+        question: "Qual é o método HTTP usado pelo Django para manipular formulários?",
+        answers: ["GET", "POST", "PUT", "DELETE"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Qual é o propósito da função 'get_object_or_404()' em Django?",
+        answers: ["Criar um novo objeto se não encontrado", "Retornar um objeto do banco de dados ou 404", "Criar uma consulta ao banco de dados", "Excluir um objeto do banco de dados"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "O que é o 'admin' do Django?",
+        answers: ["Uma interface para administração do banco de dados", "Uma ferramenta de testes de performance", "Uma interface para edição de modelos", "Uma ferramenta para gerenciar templates"],
+        correctAnswerIndex: 0
+      },
+      {
+        question: "Qual é o papel do 'middleware' no Django?",
+        answers: ["Controla as URLs da aplicação", "Manipula requisições HTTP e respostas", "Gerencia as sessões do usuário", "Define as permissões do banco de dados"],
+        correctAnswerIndex: 1
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    // Exibir pergunta atual
+    function displayQuestion() {
+      const questionElement = document.getElementById("question");
+      const answersBox = document.getElementById("answers-box");
+      const currentQuestion = questions[currentQuestionIndex];
+
+      questionElement.textContent = currentQuestion.question;
+      answersBox.innerHTML = "";
+
+      currentQuestion.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.textContent = answer;
+        button.onclick = () => checkAnswer(index);
+        answersBox.appendChild(button);
+      });
+    }
+
+    // Verificar resposta
+    function checkAnswer(selectedAnswerIndex) {
+      const currentQuestion = questions[currentQuestionIndex];
+      const isCorrect = selectedAnswerIndex === currentQuestion.correctAnswerIndex;
+
+      if (isCorrect) {
+        score++;
+      }
+
+      if (currentQuestionIndex === questions.length - 1) {
+        showScore();
+      } else {
+        currentQuestionIndex++;
+        displayQuestion();
+      }
+    }
+
+    // Mostrar pontuação
+    function showScore() {
+      const scoreContainer = document.getElementById("score-container");
+      const quizzContainer = document.getElementById("quizz-container");
+      const displayScore = document.getElementById("display-score");
+      const nextPageButton = document.getElementById("next-page-button");
+
+      const percentage = (score / questions.length) * 100;
+      displayScore.textContent = `Você acertou ${score} de ${questions.length} questões (${percentage}%)`;
+
+      quizzContainer.style.display = "none";
+      scoreContainer.style.display = "block";
+
+      if (percentage >= 70) {
+        displayScore.innerHTML += "<br><br>Parabéns! Você passou para a próxima página!";
+        nextPageButton.style.display = "block";
+      } else {
+        displayScore.innerHTML += "<br><br>Tente novamente!";
+      }
+    }
+
+    // Reiniciar quiz
+    function restartQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      document.getElementById("score-container").style.display = "none";
+      document.getElementById("quizz-container").style.display = "block";
+      displayQuestion();
+    }
+
+    // Redirecionar para a próxima página
+    function goToNextPage() {
+      window.location.href = "opcoes.html"; // Mude o caminho se necessário
+    }
+
+    // Iniciar quiz
+    displayQuestion();
+  </script>
+</body>
+</html>
